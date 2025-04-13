@@ -48,7 +48,6 @@ class DFA:
 
         return self.nodeList[name]
     
-    #checks if an input is accepted by the DFA
     def isAccepted(self, anInput):
         """
         Returns whether the input is accepted by the DFA.
