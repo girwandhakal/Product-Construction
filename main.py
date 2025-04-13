@@ -36,7 +36,7 @@ class DFA:
     
     def getNode(self, name):
         """
-        Checks whether a symbol is part of accepted input symbols.
+        Returns the node object for the state of the given name.
 
         Args:
             name(str) : name of symbol. 
