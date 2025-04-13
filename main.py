@@ -36,7 +36,7 @@ class DFA:
     
     def getNode(self, name):
         """
-        Returns the node object for the state of the given name.
+        Returns the object for the state of the given name.
 
         Args:
             name(str) : name of symbol. 
