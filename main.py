@@ -182,7 +182,7 @@ def ProductConstruction(l1, l2, operation):
         
         def getNewAcceptState(node1, node2, op):
             """
-            Returns the new alphabet given two DFA objects which is the intersection of the two languages.
+            Returns whether the new node is an accepting state or not.
 
             Args:
                 node1 (Node) : A node.
