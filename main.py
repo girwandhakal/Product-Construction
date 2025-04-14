@@ -132,8 +132,29 @@ class DFA:
 
         return False
 
+    def createJson(self):
+        os.makedirs("dfa", exist_ok=True)
 
+        # Data to write
+        dfa = {
+            "alphabet": self.alphabets,
+            "states": list(self.nodeList.keys()),
+            "startState": self.start.name,
+            "acceptStates": [name for name, node in self.nodeList.items() if node.acceptState],
+            "transitions":  {
+                name: node.rules for name, node in self.nodeList.items()
+            }
+        }
 
+        # File path
+        file_path = os.path.join("dfa", "dfa.json")
+
+        # Write to the JSON file
+        with open(file_path, "w") as f:
+            json.dump(dfa, f, indent=4)
+
+        print(f"JSON file created at {file_path}")
+        
 def ProductConstruction(l1, l2, operation):
         """
         Returns the DFA object after product construction has been applied.
@@ -343,7 +364,8 @@ def main():
         l1 = parseDFA(args.dfa1)
         l2 = parseDFA(args.dfa2)
         resultDFA = ProductConstruction(l1, l2, args.operation)
-
+        resultDFA.createJson()
+        
         if args.testString:
             isAccepted = resultDFA.isAccepted(args.testString)
             print(f"\nString '{args.testString}' is "
