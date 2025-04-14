@@ -1,3 +1,8 @@
+import argparse
+import json
+import os
+
+
 class Node:
     """
     A Node class.
@@ -252,19 +257,104 @@ def ProductConstruction(l1, l2, operation):
 
 
 #Example
-q0 = Node('q0', False, {'0':'q0', '1':'q1'})
-q1 = Node('q1', True, {'0':'q1', '1': 'q1'})
+#q0 = Node('q0', False, {'0':'q0', '1':'q1'})
+#q1 = Node('q1', True, {'0':'q1', '1': 'q1'})
 
-r0 = Node('r0', False, {'0':'r1', '1':'r2'})
-r1 = Node('r1', True, {'0':'r1', '1':'r1'})
-r2 = Node('r2', False, {'0':'r2', '1':'r2'})
+#r0 = Node('r0', False, {'0':'r1', '1':'r2'})
+#r1 = Node('r1', True, {'0':'r1', '1':'r1'})
+#r2 = Node('r2', False, {'0':'r2', '1':'r2'})
 
-l1 = DFA(['0','1'], r0, {'r0':r0, 'r1':r1, 'r2':r2})
-l2 = DFA(['0','1'], q0, {'q0':q0, 'q1':q1})
+#l1 = DFA(['0','1'], r0, {'r0':r0, 'r1':r1, 'r2':r2})
+#l2 = DFA(['0','1'], q0, {'q0':q0, 'q1':q1})
 
-l3 = ProductConstruction(l1,l2, "union")
-print(l3.isAccepted('00000002'))
+#l3 = ProductConstruction(l1,l2, "union")
+#print(l3.isAccepted('00000002'))
+
+#l3 = ProductConstruction(l1,l2)
+#print(l3.isAccepted('1000000'))
+
+def parseDFA(dfaPath):
+    if not os.path.exists(dfaPath):
+        raise FileNotFoundError(f"File {dfaPath} does not exist")
+    
+    with open(dfaPath, 'r') as f:
+        try:
+            config = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in {dfaPath}: {e}")
+    
+    fields = ["alphabet", "states", "startState", "acceptStates", "transitions"]
+    for field in fields:
+        if field not in config:
+            raise ValueError(f"Missing required field '{field}' in {dfaPath}")
+    
+    #required fields in json
+    alphabet = config["alphabet"]
+    states = config["states"]
+    startState = config["startState"]
+    acceptStates = config["acceptStates"]
+    transitions = config["transitions"]
+
+    if not isinstance(alphabet, list) or not alphabet:
+        raise ValueError("Alphabet must be non-empty")
+    if not isinstance(states, list) or not states:
+        raise ValueError("States must be non-empty")
+    if startState not in states:
+        raise ValueError("Start state must be a defined state")
+    if not isinstance(acceptStates, list):
+        raise ValueError("Accept states must be a list")
+    for state in acceptStates:
+        if state not in states:
+            raise ValueError(f"Accept state {state} mnust be a defined state")
+    if not isinstance(transitions, dict):
+        raise ValueError("Transitions must be a dictionary")
+    
+    node_list = {}
+    for state in states:
+        if state not in transitions:
+            raise ValueError(f"No transitions defined for state {state}")
+        rules = transitions[state]
+        if not isinstance(rules, dict):
+            raise ValueError(f"Transitions for state {state} must be a dictionary")
+        for symbol in alphabet:
+            if symbol not in rules:
+                raise ValueError(f"No transition for symbol '{symbol}' in state {state}")
+            next_state = rules[symbol]
+            if next_state not in states:
+                raise ValueError(f"Transition for {state} on '{symbol}' points to invalid state {next_state}")
+        
+        is_accept = state in acceptStates
+        node_list[state] = Node(state, is_accept, rules)
+
+    start_node = node_list[startState]
+    return DFA(alphabet, start_node, node_list)
 
 
+
+def main():
+    parser = argparse.ArgumentParser(description="Product construction on two DFAs")
+    parser.add_argument("--dfa1", required = True, help = "Path for DFA 1")
+    parser.add_argument("--dfa2", required = True, help = "Path for DFA 2")
+    parser.add_argument("--operation", required = True, choices = ["union", "intersection"], help = "Operation: 'union' or 'intersection'")
+    parser.add_argument("--testString", required = True, help = "String to test on result DFA")
+    args = parser.parse_args()
+
+    try:
+        l1 = parseDFA(args.dfa1)
+        l2 = parseDFA(args.dfa2)
+        resultDFA = ProductConstruction(l1, l2, args.operation)
+
+        if args.testString:
+            isAccepted = resultDFA.isAccepted(args.testString)
+            print(f"\nString '{args.testString}' is "
+                  f"{'accepted' if isAccepted else 'rejected'} by the resulting DFA.")
+        else:
+            print("\nNo test string provided.")
+    except Exception as e:
+        print(f"Error: {e}")
+        return
+
+if __name__ == "__main__":
+    main()
         
         
