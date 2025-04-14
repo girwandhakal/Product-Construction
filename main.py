@@ -139,8 +139,8 @@ def ProductConstruction(l1, l2, operation):
         Returns the DFA object after product construction has been applied.
 
         Args:
-            d1 (DFA) : A DFA for a language.
-            d2 (DFA) : A DFA for a language.
+            l1 (DFA) : A DFA for a language.
+            l2 (DFA) : A DFA for a language.
             operation (str) : 'union' or 'intersection'
         
         Returns:
