@@ -129,14 +129,14 @@ class DFA:
 
 
 
-def ProductConstruction(l1, l2, operation="union"):
+def ProductConstruction(l1, l2, operation):
         """
         Returns the DFA object after product construction has been applied.
 
         Args:
             d1 (DFA) : A DFA for a language.
             d2 (DFA) : A DFA for a language.
-            operation (str) : 'union' or 'intersection'. default is 'union'.
+            operation (str) : 'union' or 'intersection'
         
         Returns:
             DFA: A DFA object.
@@ -262,8 +262,8 @@ r2 = Node('r2', False, {'0':'r2', '1':'r2'})
 l1 = DFA(['0','1'], r0, {'r0':r0, 'r1':r1, 'r2':r2})
 l2 = DFA(['0','1'], q0, {'q0':q0, 'q1':q1})
 
-l3 = ProductConstruction(l1,l2)
-print(l3.isAccepted('1000000'))
+l3 = ProductConstruction(l1,l2, "union")
+print(l3.isAccepted('00000002'))
 
 
         
