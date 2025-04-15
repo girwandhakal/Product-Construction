@@ -51,24 +51,24 @@ class DFA:
     Attributes:
         alphabets (list): List of input symbols accepted by the language.
         start (Node): Start state of the DFA.
-        nodeList (dict): key-value pairs of state name and Node object.
+        stateList (dict): key-value pairs of state name and Node object.
     """
 
-    def __init__(self, alphabets:list, startState:Node, nodelist:dict):
+    def __init__(self, alphabets:list, startState:Node, stateList:dict):
         """
         Initializes the DFA class.
 
         Args:
             alphabets (list): Alphabet symbols of the language.
             startState (Node): Start state of the DFA.
-            nodelist (dict): key-value pairs of name of the state and the respective Node object. 
+            stateList (dict): key-value pairs of name of the state and the respective Node object. 
 
         Returns:
             DFA: A DFA object.
 
         """
                 
-        if not isinstance(nodelist, dict):
+        if not isinstance(stateList, dict):
             raise TypeError("Expected a dict")
         if not isinstance(startState, Node):
             raise TypeError("Expected a Node object")
@@ -76,7 +76,7 @@ class DFA:
             raise TypeError("Expected a list") 
                
         self.alphabets = alphabets
-        self.nodeList = nodelist
+        self.stateList = stateList
         self.start = startState
 
     def inAlphabet(self, anInput):
@@ -106,7 +106,7 @@ class DFA:
 
         """
 
-        return self.nodeList[name]
+        return self.stateList[name]
     
     def isAccepted(self, anInput):
         """
@@ -138,11 +138,11 @@ class DFA:
         # Data to write
         dfa = {
             "alphabet": self.alphabets,
-            "states": list(self.nodeList.keys()),
+            "states": list(self.stateList.keys()),
             "startState": self.start.name,
-            "acceptStates": [name for name, node in self.nodeList.items() if node.acceptState],
+            "acceptStates": [name for name, node in self.stateList.items() if node.acceptState],
             "transitions":  {
-                name: node.rules for name, node in self.nodeList.items()
+                name: node.rules for name, node in self.stateList.items()
             }
         }
 
@@ -244,7 +244,7 @@ def ProductConstruction(l1, l2, operation):
             # print(res)
             return res              
 
-        def getNewNodeList(l1, l2):
+        def getNewstateList(l1, l2):
             """
             Returns the a dictionary of new Node objects after product construction.
 
@@ -256,23 +256,23 @@ def ProductConstruction(l1, l2, operation):
                 dict: A dictionary mapping each name of state to the Node object.
             """
             
-            newNodeList = {}
-            for node1 in l1.nodeList.values():
-                for node2 in l2.nodeList.values():
+            newstateList = {}
+            for node1 in l1.stateList.values():
+                for node2 in l2.stateList.values():
                     newNodeName = getNewNodeName(node1, node2)
                     newNodeAcceptState = getNewAcceptState(node1, node2, operation)
                     # print("For node: ", newNodeName, "The rule list is: ")
                     newRules = getNewRules(node1, node2)
-                    newNodeList[newNodeName] = Node(newNodeName, newNodeAcceptState, newRules)
+                    newstateList[newNodeName] = Node(newNodeName, newNodeAcceptState, newRules)
             
-            return newNodeList
+            return newstateList
         
         newAlphabet = getNewAlphabet(l1,l2)
-        newNodeList = getNewNodeList(l1, l2)
+        newstateList = getNewstateList(l1, l2)
         newStartNodeName = getNewNodeName(l1.start, l2.start)
-        newStartNode = newNodeList[newStartNodeName]
+        newStartNode = newstateList[newStartNodeName]
 
-        newDFA = DFA(newAlphabet, newStartNode, newNodeList)
+        newDFA = DFA(newAlphabet, newStartNode, newstateList)
         return newDFA
 
 
@@ -330,7 +330,7 @@ def parseDFA(dfaPath):
     if not isinstance(transitions, dict):
         raise ValueError("Transitions must be a dictionary")
     
-    nodeList = {}
+    stateList = {}
     for state in states:
         if state not in transitions:
             raise ValueError(f"No transitions defined for state {state}")
@@ -345,10 +345,10 @@ def parseDFA(dfaPath):
                 raise ValueError(f"Transition for {state} on '{symbol}' points to invalid state {nextState}")
         
         isAccept = state in acceptStates
-        nodeList[state] = Node(state, isAccept, rules)
+        stateList[state] = Node(state, isAccept, rules)
 
-    startNode = nodeList[startState]
-    return DFA(alphabet, startNode, nodeList)
+    startNode = stateList[startState]
+    return DFA(alphabet, startNode, stateList)
 
 
 
