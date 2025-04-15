@@ -330,7 +330,7 @@ def parseDFA(dfaPath):
     if not isinstance(transitions, dict):
         raise ValueError("Transitions must be a dictionary")
     
-    node_list = {}
+    nodeList = {}
     for state in states:
         if state not in transitions:
             raise ValueError(f"No transitions defined for state {state}")
@@ -340,15 +340,15 @@ def parseDFA(dfaPath):
         for symbol in alphabet:
             if symbol not in rules:
                 raise ValueError(f"No transition for symbol '{symbol}' in state {state}")
-            next_state = rules[symbol]
-            if next_state not in states:
-                raise ValueError(f"Transition for {state} on '{symbol}' points to invalid state {next_state}")
+            nextState = rules[symbol]
+            if nextState not in states:
+                raise ValueError(f"Transition for {state} on '{symbol}' points to invalid state {nextState}")
         
-        is_accept = state in acceptStates
-        node_list[state] = Node(state, is_accept, rules)
+        isAccept = state in acceptStates
+        nodeList[state] = Node(state, isAccept, rules)
 
-    start_node = node_list[startState]
-    return DFA(alphabet, start_node, node_list)
+    startNode = nodeList[startState]
+    return DFA(alphabet, startNode, nodeList)
 
 
 
