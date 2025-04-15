@@ -123,13 +123,12 @@ class DFA:
             return False        
         currentNode = self.start
         for ch in anInput:
-
             nextNodeName = currentNode.getNextNode(ch)
             nextNode = self.getNode(nextNodeName)
-            if nextNode.acceptState == True:
-                return True
             currentNode = nextNode
 
+        if currentNode.acceptState == True:
+            return True
         return False
 
     def createJson(self, operation):
