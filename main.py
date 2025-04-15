@@ -132,7 +132,7 @@ class DFA:
 
         return False
 
-    def createJson(self):
+    def createJson(self, operation):
         os.makedirs("dfa", exist_ok=True)
 
         # Data to write
@@ -147,7 +147,7 @@ class DFA:
         }
 
         # File path
-        file_path = os.path.join("dfa", "dfa.json")
+        file_path = os.path.join("dfa", "dfa_" + operation + ".json")
 
         # Write to the JSON file
         with open(file_path, "w") as f:
@@ -364,7 +364,7 @@ def main():
         l1 = parseDFA(args.dfa1)
         l2 = parseDFA(args.dfa2)
         resultDFA = ProductConstruction(l1, l2, args.operation)
-        resultDFA.createJson()
+        resultDFA.createJson(args.operation)
         
         if args.testString:
             isAccepted = resultDFA.isAccepted(args.testString)
