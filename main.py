@@ -168,6 +168,11 @@ def ProductConstruction(l1, l2, operation):
             DFA: A DFA object.
 
         """
+        if operation not in ['union', 'intersection']:
+            raise ValueError("operation must be 'union' or 'intersection'")
+        if not isinstance(l1, DFA) or not isinstance(l2, DFA):
+            raise TypeError("Both l1 and l2 must be instances of the DFA class.")
+
 
         def getNewAlphabet(l1, l2):
             """
