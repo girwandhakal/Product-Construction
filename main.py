@@ -171,25 +171,6 @@ def ProductConstruction(l1, l2, operation):
             raise ValueError("operation must be 'union' or 'intersection'")
         if not isinstance(l1, DFA) or not isinstance(l2, DFA):
             raise TypeError("Both l1 and l2 must be instances of the DFA class.")
-
-
-        def getNewAlphabet(l1, l2):
-            """
-            Returns the new alphabet given two DFA objects which is the intersection of the two languages.
-
-            Args:
-                l1 (DFA) : A DFA for a language.
-                l2 (DFA) : A DFA for a language.
-            
-            Returns:
-                List: A list of symbols.
-
-            """
-            res = []
-            for ch in l1.alphabets:
-                if ch in l2.alphabets:
-                    res.append(ch)
-            return res
         
         def getNewNodeName(node1,node2):
             """
@@ -241,7 +222,7 @@ def ProductConstruction(l1, l2, operation):
                 dict: A dictionary mapping each input symbol to the name of the next state.
             """
 
-            alphabet = getNewAlphabet(l1, l2)
+            alphabet = l1.alphabets
             res = {}
             for ch in alphabet:
                 res[ch] = node1.rules[ch] + node2.rules[ch] #appends the name of the new node to the dictionary  
@@ -271,7 +252,7 @@ def ProductConstruction(l1, l2, operation):
             
             return newstateList
         
-        newAlphabet = getNewAlphabet(l1,l2)
+        newAlphabet = l1.alphabets #does not matter since it has to be equal anyways
         newstateList = getNewstateList(l1, l2)
         newStartNodeName = getNewNodeName(l1.start, l2.start)
         newStartNode = newstateList[newStartNodeName]
@@ -367,6 +348,11 @@ def main():
     try:
         l1 = parseDFA(args.dfa1)
         l2 = parseDFA(args.dfa2)
+
+        if l1.alphabets != l2.alphabets:
+            print("\nError: For product construction, the alphabets of the two DFA's have to be the same.\n")
+            return
+        
         resultDFA = ProductConstruction(l1, l2, args.operation)
         resultDFA.createJson(args.operation)
         
