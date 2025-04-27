@@ -1,6 +1,10 @@
 import argparse
 import json
 import os
+import itertools
+from collections import deque
+from collections import defaultdict
+from graphviz import Digraph
 
 
 class Node:
@@ -10,7 +14,7 @@ class Node:
     Attributes:
         name (str): State name.
         acceptState (bool): True if yes, False if no.
-        rules (dict): Key-value pairs of input symbol and next state.
+        rules (dict): Key-value pairs of input symbol and next state name.
 
     """
 
@@ -43,7 +47,6 @@ class Node:
         """
         return self.rules[c]
     
-
 class DFA:
     """
     A DFA Class.
@@ -260,7 +263,24 @@ def ProductConstruction(l1, l2, operation):
         newDFA = DFA(newAlphabet, newStartNode, newstateList)
         return newDFA
 
+def visualize_dfa(dfa: DFA, filename="dfa_graph"):
+    dot = Digraph(format='png')
+    
+    # Draw start node (invisible)
+    dot.node('', shape='none')
+    dot.edge('', dfa.start.name)
 
+    for name, node in dfa.stateList.items():
+        shape = "doublecircle" if node.acceptState else "circle"
+        dot.node(name, shape=shape)
+
+    for state_name, node in dfa.stateList.items():
+        for symbol, dest in node.rules.items():
+            dot.edge(state_name, dest, label=symbol)
+
+    # Render to file (creates 'dfa_graph.png')
+    dot.render(filename, cleanup=True)
+    print(f"DFA graph saved to {filename}.png")
 
 #Example
 #q0 = Node('q0', False, {'0':'q0', '1':'q1'})
@@ -335,7 +355,184 @@ def parseDFA(dfaPath):
     startNode = stateList[startState]
     return DFA(alphabet, startNode, stateList)
 
+def minimizeDFA(dfa:DFA):
+    """
+    Minimizes the given Deterministic Finite Automaton (DFA) by merging equivalent states.
 
+    This function uses the standard table-filling algorithm to determine distinguishable 
+    state pairs, then applies union-find to group equivalent (indistinguishable) states.
+    It constructs and returns a new DFA with the minimal number of states that recognizes 
+    the same language as the input DFA.
+
+    Args:
+        dfa (DFA): The DFA to be minimized.
+
+    Returns:
+        DFA: A new minimized DFA equivalent to the input DFA.
+    """
+
+    if not isinstance(dfa, DFA):
+        raise TypeError("dfa must be of type DFA")
+
+    # Get list of all DFA states
+    states = list(dfa.stateList.values())
+
+    # Generate all unique unordered pairs of states
+    pairs = list(itertools.combinations(states, 2))
+
+    # Sets to track distinguishable and undistinguishable state pairs
+    distinguishable = set()
+    undistinguishable = set(pairs)
+
+    workList = deque()
+
+    # Initially mark pairs where one is accepting and the other is not as distinguishable
+    for pair in undistinguishable:
+        if pair[0].acceptState != pair[1].acceptState:
+            workList.append(frozenset((pair[0].name, pair[1].name)))
+
+    # Initialize distinguishable set and update undistinguishable accordingly
+    distinguishable = set(workList)
+    undistinguishable = {
+        frozenset((p[0].name, p[1].name)) for p in pairs
+    } - distinguishable
+
+    # Iteratively mark more distinguishable pairs by propagating through transitions
+    while True:
+        change = False
+        new_marks = set()
+        for pair in undistinguishable:
+            p, q = tuple(pair)
+            for symbol in dfa.alphabets:
+                p_next = dfa.stateList[p].getNextNode(symbol)
+                q_next = dfa.stateList[q].getNextNode(symbol)
+                next_pair = frozenset((p_next, q_next))
+                if next_pair in distinguishable and pair not in distinguishable:
+                    new_marks.add(pair)
+                    change = True
+                    break
+        if not change:
+            break
+        distinguishable.update(new_marks)
+        undistinguishable -= new_marks
+
+    # Union-Find initialization to group equivalent states
+    parent = {name: name for name in dfa.stateList}
+
+    # Find with path compression
+    def find(a):
+        if parent[a] != a:
+            parent[a] = find(parent[a])
+        return parent[a]
+
+    # Union two sets in the union-find structure
+    def union(a, b):
+        root_a = find(a)
+        root_b = find(b)
+        if root_a != root_b:
+            parent[root_b] = root_a
+
+    # Union all undistinguishable state pairs
+    for pair in undistinguishable:
+        a, b = tuple(pair)
+        union(a, b)
+
+    # Group states by their representative (leader)
+    grouped_states = defaultdict(set)
+    for state_name in dfa.stateList:
+        leader = find(state_name)
+        grouped_states[leader].add(state_name)
+
+    # Map old state names to new merged names
+    name_map = {}
+    for leader, members in grouped_states.items():
+        new_name = "_".join(sorted(members))
+        for member in members:
+            name_map[member] = new_name
+
+    # Construct the new minimized DFA state dictionary
+    new_state_dict = {}
+    for merged_name in set(name_map.values()):
+        sample_state_name = next(k for k, v in name_map.items() if v == merged_name)
+        sample_node = dfa.stateList[sample_state_name]
+        
+        # Build transitions using mapped merged state names
+        new_rules = {
+            symbol: name_map[sample_node.rules[symbol]] for symbol in dfa.alphabets
+        }
+
+        # Determine if any of the merged states were accepting
+        group_members = grouped_states[find(sample_state_name)]
+        is_accepting = any(dfa.stateList[name].acceptState for name in group_members)
+
+        # Create the new Node for the merged state
+        new_state_dict[merged_name] = Node(merged_name, is_accepting, new_rules)
+
+    # Define the new start state
+    new_start_node = new_state_dict[name_map[dfa.start.name]]
+
+    # Return the minimized DFA
+    return DFA(dfa.alphabets, new_start_node, new_state_dict)
+    
+def test_minimize_dfa():
+    q0 = Node('q0', False, {'0': 'q0', '1': 'q1'})
+    q1 = Node('q1', True,  {'0': 'q1', '1': 'q0'})
+
+    state_map = {
+        'q0': q0,
+        'q1': q1
+    }
+
+    test_dfa = DFA(['0', '1'], q0, state_map)
+    min_dfa = minimizeDFA(test_dfa)
+
+
+
+    test_cases = {
+        "": False,        # even 1s (0 of them)
+        "1": True,        # 1 one
+        "0": False,       # 0 has no effect
+        "11": False,      # 2 ones → even
+        "101": False,      # 2 ones and one more → odd
+        "111": True,      # 3 ones → odd
+        "1111": False,    # 4 → even
+        "101010": True,  # 2 ones → even
+        "1001001": True   # 3 ones → odd
+    }
+
+
+
+    for s, expected in test_cases.items():
+        result = min_dfa.isAccepted(s)
+        print(f"Input: '{s}' → {'Accepted' if result else 'Rejected'} (Expected: {'Accepted' if expected else 'Rejected'})")
+        assert result == expected, f"Test failed on input: '{s}'"
+
+    print("All test cases passed ✅")
+
+    print(f"Original DFA states: {len(test_dfa.stateList)}")
+    print(f"Minimized DFA states: {len(min_dfa.stateList)}\n")
+
+    print("Merged state groups:")
+    parent = {name: name for name in test_dfa.stateList}
+    def find(a):
+        if parent[a] != a:
+            parent[a] = find(parent[a])
+        return parent[a]
+    for pair in itertools.combinations(test_dfa.stateList.keys(), 2):
+        a, b = pair
+        if frozenset(pair) in {
+            frozenset((s1, s2)) for s1 in test_dfa.stateList for s2 in test_dfa.stateList
+        }:
+            continue
+        if find(a) == find(b):
+            print(f"{a} and {b} are merged")
+
+    print("\nTransitions in Minimized DFA:")
+    for state_name, node in min_dfa.stateList.items():
+        print(f"State: {state_name} | Accepting: {node.acceptState}")
+        for symbol, target in node.rules.items():
+            print(f"  {symbol} → {target}")
+    
 
 def main():
     parser = argparse.ArgumentParser(description="Product construction on two DFAs")
@@ -353,7 +550,8 @@ def main():
             print("\nError: For product construction, the alphabets of the two DFA's have to be the same.\n")
             return
         
-        resultDFA = ProductConstruction(l1, l2, args.operation)
+        resultDFA = minimizeDFA(ProductConstruction(l1, l2, args.operation))
+        # visualize_dfa(resultDFA, filename="min_graph")
         resultDFA.createJson(args.operation)
         
         if args.testString:
