@@ -4,25 +4,25 @@
         "1"
     ],
     "states": [
-        "r2q0",
+        "r0q1_r1q0_r1q1_r2q1",
         "r0q0",
-        "r0q1_r1q0_r1q1_r2q1"
+        "r2q0"
     ],
     "startState": "r0q0",
     "acceptStates": [
         "r0q1_r1q0_r1q1_r2q1"
     ],
     "transitions": {
-        "r2q0": {
-            "0": "r2q0",
+        "r0q1_r1q0_r1q1_r2q1": {
+            "0": "r0q1_r1q0_r1q1_r2q1",
             "1": "r0q1_r1q0_r1q1_r2q1"
         },
         "r0q0": {
             "0": "r0q1_r1q0_r1q1_r2q1",
             "1": "r0q1_r1q0_r1q1_r2q1"
         },
-        "r0q1_r1q0_r1q1_r2q1": {
-            "0": "r0q1_r1q0_r1q1_r2q1",
+        "r2q0": {
+            "0": "r2q0",
             "1": "r0q1_r1q0_r1q1_r2q1"
         }
     }

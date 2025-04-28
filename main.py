@@ -532,8 +532,8 @@ def test_minimize_dfa():
         print(f"State: {state_name} | Accepting: {node.acceptState}")
         for symbol, target in node.rules.items():
             print(f"  {symbol} → {target}")
-    
 
+            
 def main():
     parser = argparse.ArgumentParser(description="Product construction on two DFAs")
     parser.add_argument("--dfa1", required = True, help = "Path for DFA 1")
