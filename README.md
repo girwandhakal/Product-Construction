@@ -3,8 +3,11 @@
 Python 3 is needed to run this program, as well as the python library Graphviz.
 
 Usage:
-    python main.py --dfa1 <pathToDFA1.json> --dfa2 <pathToDFA2.json> --operation <union | intersection> --testString <string>
-
+    main.py:
+        python main.py --dfa1 <pathToDFA1.json> --dfa2 <pathToDFA2.json> --operation <union | intersection> --testString <string>
+    xor.py:
+        python xor.py --union <pathToUnion.json> --intersection <pathToIntersection> 
+        
 For help, use: python main.py --help
 
 DFAs are defined with this JSON structure (also found in dfa folder):
