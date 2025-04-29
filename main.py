@@ -551,7 +551,7 @@ def main():
             return
         
         resultDFA = minimizeDFA(ProductConstruction(l1, l2, args.operation))
-        #visualize_dfa(resultDFA, filename="min_graph")
+        visualize_dfa(resultDFA, filename="min_graph")
         resultDFA.createJson(args.operation)
         
         if args.testString:

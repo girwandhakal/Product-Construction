@@ -1,5 +1,7 @@
 # Product-Construction
  
+Python 3 is needed to run this program, as well as the python library Graphviz.
+
 Usage:
     python main.py --dfa1 <pathToDFA1.json> --dfa2 <pathToDFA2.json> --operation <union | intersection> --testString <string>
 
