@@ -222,8 +222,8 @@ def main():
     percent_change_union = round(((total_time_after_minimization_union-total_time_before_minimization_union)/total_time_before_minimization_union) * 100,2)
     percent_change_intersection = round(((total_time_after_minimization_intersection-total_time_before_minimization_intersection)/total_time_before_minimization_intersection) * 100,2)
 
-    print(f"Total time before minimization on union: {total_time_before_minimization_union} \nTotal time after minimization on union: {total_time_after_minimization_union}\nPercent change = {percent_change_union}%. \n")
-    print(f"Total time before minimization on intersection: {total_time_before_minimization_intersection} \nTotal time after minimization on intersection: {total_time_after_minimization_intersection}\nPercent change = {percent_change_intersection}%. \n")
+    print(f"Total time before minimization on union: {round(total_time_before_minimization_union*100000,2)} microseconds \nTotal time after minimization on union: {round(total_time_after_minimization_union*100000,2)} microseconds\nPercent change = {percent_change_union}%. \n")
+    print(f"Total time before minimization on intersection: {round(total_time_before_minimization_intersection*100000,2)} microseconds \nTotal time after minimization on intersection: {round(total_time_after_minimization_intersection*100000,2)} microseconds\nPercent change = {percent_change_intersection}%. \n")
     
     
             
