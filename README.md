@@ -1,6 +1,7 @@
 # Product-Construction
  
-Python 3 is needed to run this program, as well as the python library Graphviz.
+Python 3 is needed to run this program, as well as the python library Graphviz. A link to download the Graphviz library can be found here:
+    https://graphviz.org/download/
 
 Usage:
     main.py:
@@ -47,3 +48,5 @@ Notes:
     - A PNG file containing an image of the resulting DFA will be saved to a file called "min_graph.png". This file will also be overwritten after any subsequent executions of the program. 
 
     - The file "test_minimization.py" was used to conduct an experiment for our report. The actual implementation of minimization is within main.py.
+
+    - If you wish to run the program without Graphviz (or are having problems installing), place a '#' at the beginning of line 555 in main.py to comment out this code.
